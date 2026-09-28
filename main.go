@@ -1,43 +1,45 @@
 package main
 
-func maskLinks(message string) []byte { 
-buf := []byte(message)
-for i := 0; i < len(buf)-7; i++ {
- // Проверяем, начинается ли здесь "http://"
- if buf[i] == 'h' &&
-  buf[i+1] == 't' &&
-  buf[i+2] == 't' &&
-  buf[i+3] == 'p' &&
-  buf[i+4] == ':' &&
-  buf[i+5] == '/' &&
-  buf[i+6] == '/' {
+import "fmt"
 
-  // Начинаем после "http://"
-  j := i + 7
+func maskLinks(message string) string {
+	buf := []byte(message)
+	prefix := []byte("http://")
 
-  // Ищем конец ссылки
-  for j < len(buf) &&
-   buf[j] != ' ' &&
-   buf[j] != '\n' &&
-   buf[j] != '\t' {
+	for i := 0; i <= len(buf)-len(prefix); i++ {
 
-   buf[j] = '*'
-   j++
-  }
+		// Проверяем "http://"
+		match := true
 
-  // Перескакиваем сразу в конец замаскированной ссылки
-  i = j - 1
- }
+		for k := range prefix {
+			if buf[i+k] != prefix[k] {
+				match = false
+				break
+			}
+		}
+
+		if match {
+			j := i + len(prefix)
+
+			// Маскируем ссылку
+			for j < len(buf) &&
+				buf[j] != ' ' &&
+				buf[j] != '\n' &&
+				buf[j] != '\t' {
+
+				buf[j] = '*'
+				j++
+			}
+
+			i = j - 1
+		}
+	}
+
+	return string(buf)
 }
 
-return buf
+func main() {
+	fmt.Println(maskLinks(
+		" http://com  Hello, its my page: http://com See you http://com ",
+	))
 }
-
-func main(){
-maskLinks("Hello, its my page: http://localhost123.com See you")
-}
-
-
-
-
-
